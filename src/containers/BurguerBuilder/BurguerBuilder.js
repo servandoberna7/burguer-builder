@@ -6,27 +6,17 @@ import Modal from "../../components/UI/Modal/Modal";
 import OrderSummary from "../../components/Burguer/OrderSummary/OrderSummary";
 import Spinner from "../../components/UI/Spinner/Spinner";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
-import axios from "../../axios-orders";
 import { connect } from "react-redux";
-import * as actionTypes from "../../store/actions";
+import * as burguerBuilderActions from "../../store/actions/index";
+import axios from "../../axios-orders";
 
 class BurguerBuilder extends Component {
   state = {
-    purchasing: false,
-    loading: false,
-    error: false
+    purchasing: false
   };
 
   componentDidMount() {
-    // axios
-    //   .get("https://burguer-builder-8cb88.firebaseio.com/ingredients.json")
-    //   .then(response => {
-    //     this.setState({ ingredients: response.data, loading: false });
-    //   })
-    //   .catch(error => {
-    //     console.log("Error fetching ingredients:", error);
-    //     this.setState({ error: true });
-    //   });
+    this.props.onInitIngredients();
   }
 
   updatePurchaseState = ingredients => {
@@ -58,7 +48,7 @@ class BurguerBuilder extends Component {
     }
 
     let orderSummary = null;
-    let burguer = this.state.error ? (
+    let burguer = this.props.error ? (
       <p>Burguer can't be displayed</p>
     ) : (
       <Spinner />
@@ -87,9 +77,6 @@ class BurguerBuilder extends Component {
         />
       );
     }
-    if (this.state.loading) {
-      orderSummary = <Spinner />;
-    }
 
     return (
       <Aux>
@@ -108,16 +95,18 @@ class BurguerBuilder extends Component {
 const mapStateToProps = state => {
   return {
     ings: state.ingredients,
-    price: state.totalPrice
+    price: state.totalPrice,
+    error: state.error
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
     onIngredientAdded: name =>
-      dispatch({ type: actionTypes.ADD_INGREDIENT, ingredientName: name }),
+      dispatch(burguerBuilderActions.addIngredient(name)),
     onIngredientRemoved: name =>
-      dispatch({ type: actionTypes.REMOVE_INGREDIENT, ingredientName: name })
+      dispatch(burguerBuilderActions.removeIngredient(name)),
+    onInitIngredients: () => dispatch(burguerBuilderActions.initIngredients())
   };
 };
 
